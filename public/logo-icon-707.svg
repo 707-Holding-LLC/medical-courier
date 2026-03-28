@@ -1,0 +1,19 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- ══ CROSS (bare, no box, rounded arms like MEDeliver) ══ -->
+  <!-- Vertical bar -->
+  <rect x="44" y="8"  width="32" height="104" rx="9" fill="#1e4d35"/>
+  <!-- Horizontal bar -->
+  <rect x="8"  y="44" width="104" height="32" rx="9" fill="#1e4d35"/>
+
+  <!-- ══ ECG HEARTBEAT LINE through middle of cross ══ -->
+  <polyline
+    points="8,60  22,60  30,60  38,60  44,46  52,80  58,30  64,60  70,60  76,60  82,60  90,60  112,60"
+    fill="none"
+    stroke="#b6d4c0"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+</svg>

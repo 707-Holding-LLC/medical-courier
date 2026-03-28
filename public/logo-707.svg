@@ -1,0 +1,30 @@
+<svg width="600" height="160" viewBox="0 0 600 160" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Background -->
+  <rect width="600" height="160" fill="#f2f5f0"/>
+
+  <!-- ══ CROSS ICON (no box, bare cross like MEDeliver) ══ -->
+  <!-- Vertical bar of cross -->
+  <rect x="46" y="18" width="28" height="84" rx="7" fill="#1e4d35"/>
+  <!-- Horizontal bar of cross -->
+  <rect x="18" y="46" width="84" height="28" rx="7" fill="#1e4d35"/>
+
+  <!-- ══ ECG / HEARTBEAT LINE ══ -->
+  <polyline
+    points="18,60  34,60  40,60  46,60  52,46  58,78  63,38  68,60  74,60  80,60  86,60  102,60"
+    fill="none"
+    stroke="#b6d4c0"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- ══ WORDMARK ══ -->
+  <!-- "707 Medical Services" -->
+  <text x="122" y="72" font-family="'Arial', 'Helvetica Neue', sans-serif" font-size="34" font-weight="700" fill="#1e4d35" letter-spacing="-0.5">707 Medical Services</text>
+
+  <!-- Tagline -->
+  <text x="123" y="97" font-family="'Arial', 'Helvetica Neue', sans-serif" font-size="10.5" fill="#3d7a5a" letter-spacing="2.5" font-weight="400">RELIABLE HEALTHCARE LOGISTICS</text>
+  <text x="123" y="113" font-family="'Arial', 'Helvetica Neue', sans-serif" font-size="10.5" fill="#8fad9a" letter-spacing="2.5" font-weight="400">SUPPORTING CHICAGO AND ILLINOIS</text>
+
+</svg>
