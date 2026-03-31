@@ -120,7 +120,7 @@ function CTASection() {
       <div className="container-shell">
         <div className="relative overflow-hidden rounded-[2.25rem] bg-brand-green p-6 shadow-card sm:p-8 lg:p-12">
           <div className="absolute inset-0">
-            <div className="absolute left-0 top-0 h-full w-full bg-white" />
+            <div className="absolute left-0 top-0 h-full w-full bg-brand-green" />
             <div className="absolute left-0 top-0 h-full w-full bg-brand-green [clip-path:polygon(0_0,100%_0,58%_100%,0_100%)]" />
           </div>
 
