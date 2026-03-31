@@ -4,10 +4,10 @@ import { useRef, useState } from "react";
 
 // Google Form action endpoint — note: /formResponse (not /viewform)
 const FORM_ACTION =
-  "https://docs.google.com/forms/d/e/1FAIpQLSdGskMl9fzHZ89t78-JgOP5jvGmtkOGhNPsAKjaqDuHhmG6Vw/formResponse";
+  "https://docs.google.com/forms/d/e/1FAIpQLSd9beJC6jvPqaYQNDMFNIYmc5nfI5_n1lcnxf7eE8TUPgJ6ow/formResponse";
 
 const deliveryOptions = [
-  "Standard Delivery",
+  "Standard Delivery (Next Day)",
   "Same-Day Delivery",
   "STAT / Urgent Delivery",
   "Scheduled Route Pickup",
