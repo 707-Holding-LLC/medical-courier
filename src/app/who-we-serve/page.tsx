@@ -367,7 +367,7 @@ function CommunityImpactSection() {
               </h2>
 
               <p className="mt-6 text-lg leading-8 text-slate-600">
-                At 707 Holdings, we view ourselves as an extension of the
+                At 707 MEDeliver, we view ourselves as an extension of the
                 healthcare community. Every delivery we make directly impacts
                 patient outcomes. By providing reliable logistics, we help doctors
                 diagnose faster, allow researchers to innovate, and ensure
@@ -381,7 +381,7 @@ function CommunityImpactSection() {
                   work, lives are saved.&quot;
                 </p>
                 <p className="mt-5 text-lg font-semibold text-slate-900">
-                  — Operations Director, 707 Holdings
+                  — Operations Director, 707 MEDeliver
                 </p>
               </div>
             </div>

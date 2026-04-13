@@ -50,7 +50,7 @@ export default function Footer() {
 
             <div className="mt-8 flex items-center gap-4">
               <a
-                href="https://www.linkedin.com/in/nnenna-animashaun-2b42b9359?trk=contact-info"
+                href="https://www.linkedin.com/company/707-medeliver"
                 aria-label="LinkedIn"
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white transition hover:bg-white/20"
               >
@@ -135,7 +135,7 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-white/10 pt-8">
           <p className="text-sm leading-6 text-white/60">
-            © 2026 707 Medical Courier Services. All Rights
+            © 2026 707 MEDeliver. All Rights
             Reserved. Designed for excellence in healthcare logistics.
           </p>
         </div>

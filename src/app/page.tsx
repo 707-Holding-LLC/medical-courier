@@ -129,7 +129,7 @@ function CTASection() {
               Ready to streamline your medical logistics?
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-7 text-white/80">
-              Experience the reliability of 707 Medical Courier Services team
+              Experience the reliability of 707 MEDeliver team
               today for secure, compliant and time-sensitive delivery support.
             </p>
             <Link
@@ -166,7 +166,7 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-brand-muted">
-                707 Medical Courier Services provides professional medical transport
+                707 MEDeliver provides professional medical transport
                 and specialized logistics solutions across Chicago and the entire
                 state of Illinois. Trust us with your time-critical healthcare
                 needs.
@@ -219,7 +219,7 @@ export default function HomePage() {
                 A Partnership Built on Trust and Precision
               </h2>
               <p className="body-muted mt-6">
-                707 Medical Courier Services are committed to providing safe,
+                707 MEDeliver are committed to providing safe,
                 timely, and compliant logistics for the healthcare industry. Our
                 dedicated team ensures that critical medical items reach their
                 destination with the highest level of care.

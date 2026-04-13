@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Reliability & Compliance",
   description:
-    "Learn how 707 Medical Services approaches HIPAA awareness, secure specimen handling, chain-of-custody procedures, professional courier standards, and reliable delivery operations.",
+    "Learn how 707 MEDeliver approaches HIPAA awareness, secure specimen handling, chain-of-custody procedures, professional courier standards, and reliable delivery operations.",
 };
 
 const compliancePillars = [
@@ -177,7 +177,7 @@ function HeroSection() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-              707 Medical Services prioritizes privacy awareness, secure specimen
+              707 MEDeliver prioritizes privacy awareness, secure specimen
               handling, professional courier operations, and reliable delivery
               processes designed for healthcare logistics.
             </p>

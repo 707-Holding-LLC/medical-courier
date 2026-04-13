@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
-    "Read the Terms of Service for 707 Medical Services and understand the conditions governing use of this website.",
+    "Read the Terms of Service for MEDeliver and understand the conditions governing use of this website.",
 };
 
 export default function TermsOfServicePage() {
@@ -37,7 +37,7 @@ export default function TermsOfServicePage() {
               <div className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:text-slate-900 prose-p:text-slate-600 prose-li:text-slate-600">
                 <p>
                   These Terms of Service (“Terms”) govern your use of the 
-                  707 Medical Services website and any inquiries
+                  707 MEDeliver website and any inquiries
                   submitted through it. By accessing or using this website, you
                   agree to these Terms.
                 </p>
@@ -129,7 +129,7 @@ export default function TermsOfServicePage() {
                 <h2>9. Limitation of Liability</h2>
                 <p>
                   To the fullest extent permitted by law, 707
-                  Medical Services shall not be liable for any indirect,
+                  MEDeliver shall not be liable for any indirect,
                   incidental, consequential, special, or punitive damages
                   arising out of or related to your use of the website.
                 </p>
@@ -180,7 +180,7 @@ export default function TermsOfServicePage() {
 
                 <h2>15. Contact Us</h2>
                 <p>
-                  707 Medical Services
+                  707 MEDeliver
                   <br />
                   1 E Erie St Suite 525-3498
                   <br />

@@ -483,7 +483,7 @@ function Section4({ data, set }: { data: FormData; set: (k: keyof FormData, v: s
       </div>
 
       <SectionNote>
-        707 Medical Courier Services requires all driver candidates to complete a criminal background check,
+        707 MEDeliver requires all driver candidates to complete a criminal background check,
         motor vehicle record (MVR) check, and pre-employment drug screening as a condition of employment.
         Please read and respond to the statements below.
       </SectionNote>

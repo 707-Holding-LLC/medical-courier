@@ -36,7 +36,7 @@ export default function PrivacyPolicyPage() {
             <div className="mt-10 rounded-[1.75rem] border border-brand-border bg-white p-8 shadow-card sm:p-10">
               <div className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:text-slate-900 prose-p:text-slate-600 prose-li:text-slate-600">
                 <p>
-                  707 Medical Services (“Company,” “we,” “our,”
+                  707 MEDeliver (“Company,” “we,” “our,”
                   or “us”) values your privacy. This Privacy Policy explains how
                   we collect, use, disclose, and protect personal information
                   collected through our website and related service inquiries.
@@ -185,7 +185,7 @@ export default function PrivacyPolicyPage() {
 
                 <h2>12. Contact Us</h2>
                 <p>
-                  707 Medical Services
+                  707 MEDeliver
                   <br />
                   1 E Erie St Suite 525-3498
                   <br />

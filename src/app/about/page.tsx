@@ -35,7 +35,7 @@ const differentiators = [
   {
     title: "Federal-Grade Operational Standards",
     description:
-      "Founded by a former HHS senior leader with 18+ years of federal program management experience, 707 Medical Courier Services applies institutional-grade compliance, structure, and accountability to every client engagement.",
+      "Founded by a former HHS senior leader with 18+ years of federal program management experience, 707 MEDeliver applies institutional-grade compliance, structure, and accountability to every client engagement.",
     icon: "gear",
   },
 ];
@@ -186,7 +186,7 @@ function ProblemSolutionSection() {
           <Reveal delay={0.28}>
             <div className="mx-auto mt-8 max-w-xl">
               <p className="text-base leading-8 text-slate-600">
-                707 Medical Courier Services was built to eliminate that risk - with
+                707 MEDeliver was built to eliminate that risk - with
                 HIPAA-compliant, precision-driven courier services designed
                 specifically for Chicago&apos;s healthcare community. We don&apos;t
                 repurpose general freight infrastructure. We build dedicated
@@ -214,7 +214,7 @@ function DifferentiatorsSection() {
             <span className="h-[2px] w-10 rounded-full bg-brand-green" />
           </div>
           <h2 className="mt-5 font-heading text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
-            Why Healthcare Providers Choose 707 Medical Courier Services
+            Why Healthcare Providers Choose 707 MEDeliver
           </h2>
         </Reveal>
 
@@ -272,7 +272,7 @@ function FoundingStorySection() {
               unreliable.
             </p>
             <p>
-              707 Medical Courier Services was built to change that. Not by adapting an
+              707 MEDeliver was built to change that. Not by adapting an
               existing freight model - but by building a healthcare logistics
               company from the ground up, with compliance, precision, and
               patient outcomes at the center of every decision.
@@ -340,7 +340,7 @@ function LeadershipSection() {
                 community impact.
               </p>
               <p>
-                She founded 707 Medical Courier Services, to bring that same standard of
+                She founded 707 MEDeliver, to bring that same standard of
                 operational discipline and accountability to healthcare
                 logistics in Chicago - building a medical courier and logistics
                 platform that treats every delivery as a critical link in the
@@ -438,7 +438,7 @@ function CTASection() {
               Ready to Work With a Logistics Partner You Can Trust?
             </h2>
             <p className="mt-5 text-base leading-8 text-white/75">
-              Let&apos;s talk about how 707 Medical Courier Services can support your healthcare
+              Let&apos;s talk about how 707 MEDeliver can support your healthcare
               operations in Chicago.
             </p>
             <Link
