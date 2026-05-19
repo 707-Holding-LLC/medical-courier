@@ -6,9 +6,9 @@ import Reveal from "@/components/Reveal";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About | 707 Holding, LLC — Medical Courier & Healthcare Logistics, Chicago",
+  title: "About | 707 MEDeliver, LLC — Medical Courier & Healthcare Logistics, Chicago",
   description:
-    "707 Holding is a Chicago-based HIPAA-compliant medical courier and healthcare logistics company. Learn about our founding story, leadership, and commitment to precision delivery.",
+    "707 MEDeliver is a Chicago-based HIPAA-compliant medical courier and healthcare logistics company. Learn about our founding story, leadership, and commitment to precision delivery.",
 };
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -305,7 +305,7 @@ function LeadershipSection() {
             <div className="group relative h-[280px] w-[280px] overflow-hidden rounded-full border-4 border-white bg-white shadow-[0_25px_60px_rgba(22,56,40,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:h-[320px] sm:w-[320px]">
               <Image
                 src="/headshot.jpeg"
-                alt="Nnenna Animashaun, Founder and CEO of 707 Holding LLC, Chicago healthcare logistics"
+                alt="Nnenna Animashaun, Founder and CEO of 707 MEDeliver, LLC, Chicago healthcare logistics"
                 fill
                 sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 380px"
                 className="object-cover transition duration-500 group-hover:scale-105"
@@ -325,7 +325,7 @@ function LeadershipSection() {
             </h2>
 
             <p className="mt-3 text-lg font-semibold text-brand-green">
-              Founder &amp; Chief Executive Officer, 707 Holding, LLC
+              Founder &amp; Chief Executive Officer, 707 MEDeliver, LLC
             </p>
 
             <div className="mt-5 h-1.5 w-20 rounded-full bg-brand-green" />
