@@ -3,6 +3,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CareerApplicationForm from "@/components/CareerApplicationForm";
 import type { Metadata } from "next";
+import { client } from "@/sanity/lib/client";
+import { careersPageQuery } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = {
   title: "Careers",
@@ -10,7 +12,54 @@ export const metadata: Metadata = {
     "Explore career opportunities with 707 Medical Courier Services and join a team focused on reliability, professionalism, and healthcare logistics excellence.",
 };
 
-const benefits = [
+type Benefit = {
+  title?: string;
+  description?: string;
+};
+
+type Role = {
+  title?: string;
+  type?: string;
+  location?: string;
+  summary?: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  buttonText?: string;
+  buttonHref?: string;
+};
+
+type CareersPageData = {
+  hero?: {
+    kicker?: string;
+    titleLine1?: string;
+    titleLine2?: string;
+    description?: string;
+    primaryButtonText?: string;
+    primaryButtonHref?: string;
+    secondaryButtonText?: string;
+    secondaryButtonHref?: string;
+  };
+  benefits?: Benefit[];
+  openRolesSection?: {
+    kicker?: string;
+    title?: string;
+    description?: string;
+    roles?: Role[];
+  };
+  qualificationsSection?: {
+    kicker?: string;
+    title?: string;
+    description?: string;
+    items?: string[];
+  };
+  applicationSection?: {
+    kicker?: string;
+    title?: string;
+    description?: string;
+  };
+};
+
+const fallbackBenefits = [
   {
     title: "Healthcare Impact",
     description:
@@ -28,7 +77,7 @@ const benefits = [
   },
 ];
 
-const openRoles = [
+const fallbackOpenRoles: Role[] = [
   {
     title: "Medical Courier Driver",
     type: "Contract / Part-Time / Full-Time",
@@ -88,7 +137,7 @@ const openRoles = [
   },
 ];
 
-const qualifications = [
+const fallbackQualifications = [
   "Valid driver's license and dependable transportation where applicable",
   "Professional attitude and customer-facing communication skills",
   "Strong punctuality and ability to follow structured procedures",
@@ -96,56 +145,77 @@ const qualifications = [
   "Respect for confidentiality, secure handling, and operational discipline",
 ];
 
-export default function CareersPage() {
+async function getCareersPage(): Promise<CareersPageData | null> {
+  return client.fetch(careersPageQuery, {}, { cache: "no-store" });
+}
+
+export default async function CareersPage() {
+  const page = await getCareersPage();
+
+  const benefits =
+    page?.benefits && page.benefits.length > 0
+      ? page.benefits
+      : fallbackBenefits;
+
+  const openRoles =
+    page?.openRolesSection?.roles && page.openRolesSection.roles.length > 0
+      ? page.openRolesSection.roles
+      : fallbackOpenRoles;
+
+  const qualifications =
+    page?.qualificationsSection?.items &&
+    page.qualificationsSection.items.length > 0
+      ? page.qualificationsSection.items
+      : fallbackQualifications;
+
   return (
     <main className="min-h-screen bg-brand-bg">
       <Navbar />
 
-      {/* ── Hero ── */}
       <section className="section-space pb-10">
         <div className="container-shell">
           <div className="max-w-4xl">
             <span className="inline-flex items-center rounded-full bg-brand-soft px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-greenMedium">
-              Career Opportunities
+              {page?.hero?.kicker || "Career Opportunities"}
             </span>
 
             <h1 className="mt-6 font-heading text-5xl font-bold leading-[1.02] tracking-tight text-slate-900 sm:text-6xl">
-              Join a Team Built on
+              {page?.hero?.titleLine1 || "Join a Team Built on"}
               <br />
-              <span className="text-brand-green">Reliability &amp; Care</span>
+              <span className="text-brand-green">
+                {page?.hero?.titleLine2 || "Reliability & Care"}
+              </span>
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600">
-              We&apos;re building a professional medical courier operation focused on
-              secure handling, dependable service, and healthcare logistics
-              excellence across Chicago and Illinois.
+              {page?.hero?.description ||
+                "We're building a professional medical courier operation focused on secure handling, dependable service, and healthcare logistics excellence across Chicago and Illinois."}
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <a
-                href="#apply"
+                href={page?.hero?.primaryButtonHref || "#apply"}
                 className="inline-flex items-center justify-center rounded-xl bg-brand-green px-6 py-4 text-sm font-semibold text-white shadow-card transition hover:bg-brand-greenMedium"
               >
-                Apply Now →
+                {page?.hero?.primaryButtonText || "Apply Now →"}
               </a>
               <Link
-                href="/contact"
+                href={page?.hero?.secondaryButtonHref || "/contact"}
                 className="inline-flex items-center justify-center rounded-xl border border-brand-border bg-white px-6 py-4 text-sm font-semibold text-slate-800 transition hover:border-brand-green hover:text-brand-green"
               >
-                Contact Us
+                {page?.hero?.secondaryButtonText || "Contact Us"}
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Benefits ── */}
       <section className="pb-12">
         <div className="container-shell">
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {benefits.map((item) => (
+            {benefits.map((item, index) => (
               <article
-                key={item.title}
+                key={item.title || index}
                 className="rounded-[1.5rem] border border-brand-border bg-white p-8 shadow-card"
               >
                 <h2 className="font-heading text-2xl font-semibold text-slate-900">
@@ -160,23 +230,26 @@ export default function CareersPage() {
         </div>
       </section>
 
-      {/* ── Open Roles ── */}
       <section className="py-12">
         <div className="container-shell">
           <div className="rounded-[1.75rem] bg-[#eef2f4] p-8 sm:p-10 lg:p-12">
             <div className="max-w-3xl">
-              <span className="section-kicker">Open Roles</span>
-              <h2 className="section-title">Current Opportunities</h2>
+              <span className="section-kicker">
+                {page?.openRolesSection?.kicker || "Open Roles"}
+              </span>
+              <h2 className="section-title">
+                {page?.openRolesSection?.title || "Current Opportunities"}
+              </h2>
               <p className="body-muted mt-4">
-                Explore roles designed for dependable professionals who value
-                timeliness, care, and structured logistics operations.
+                {page?.openRolesSection?.description ||
+                  "Explore roles designed for dependable professionals who value timeliness, care, and structured logistics operations."}
               </p>
             </div>
 
             <div className="mt-10 grid gap-6">
-              {openRoles.map((role) => (
+              {openRoles.map((role, index) => (
                 <article
-                  key={role.title}
+                  key={role.title || index}
                   className="rounded-[1.5rem] border border-brand-border bg-white p-8 shadow-card"
                 >
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -193,10 +266,10 @@ export default function CareersPage() {
                     </div>
 
                     <a
-                      href="#apply"
+                      href={role.buttonHref || "#apply"}
                       className="inline-flex items-center justify-center rounded-xl bg-brand-green px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-greenMedium"
                     >
-                      Apply Now
+                      {role.buttonText || "Apply Now"}
                     </a>
                   </div>
 
@@ -210,7 +283,7 @@ export default function CareersPage() {
                         Responsibilities
                       </h4>
                       <ul className="mt-4 space-y-3">
-                        {role.responsibilities.map((item) => (
+                        {(role.responsibilities || []).map((item) => (
                           <li
                             key={item}
                             className="flex items-start gap-3 text-base leading-7 text-slate-600"
@@ -229,7 +302,7 @@ export default function CareersPage() {
                         Requirements
                       </h4>
                       <ul className="mt-4 space-y-3">
-                        {role.requirements.map((item) => (
+                        {(role.requirements || []).map((item) => (
                           <li
                             key={item}
                             className="flex items-start gap-3 text-base leading-7 text-slate-600"
@@ -250,17 +323,20 @@ export default function CareersPage() {
         </div>
       </section>
 
-      {/* ── Qualifications ── */}
       <section className="py-12">
         <div className="container-shell">
           <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <div>
-              <span className="section-kicker">What We Look For</span>
-              <h2 className="section-title">Candidate Qualifications</h2>
+              <span className="section-kicker">
+                {page?.qualificationsSection?.kicker || "What We Look For"}
+              </span>
+              <h2 className="section-title">
+                {page?.qualificationsSection?.title ||
+                  "Candidate Qualifications"}
+              </h2>
               <p className="body-muted mt-4">
-                We value dependable people who can represent the company well,
-                follow procedures carefully, and support time-sensitive medical
-                logistics operations.
+                {page?.qualificationsSection?.description ||
+                  "We value dependable people who can represent the company well, follow procedures carefully, and support time-sensitive medical logistics operations."}
               </p>
             </div>
 
@@ -283,16 +359,18 @@ export default function CareersPage() {
         </div>
       </section>
 
-      {/* ── Application Form ── */}
       <section id="apply" className="section-space py-16">
         <div className="container-shell">
           <div className="mb-10 max-w-2xl">
-            <span className="section-kicker">Apply Now</span>
-            <h2 className="section-title">Submit Your Application</h2>
+            <span className="section-kicker">
+              {page?.applicationSection?.kicker || "Apply Now"}
+            </span>
+            <h2 className="section-title">
+              {page?.applicationSection?.title || "Submit Your Application"}
+            </h2>
             <p className="body-muted mt-4">
-              Complete the form below. Qualified candidates will be contacted
-              within 5–7 business days. All information is kept confidential
-              and used solely for employment screening purposes.
+              {page?.applicationSection?.description ||
+                "Complete the form below. Qualified candidates will be contacted within 5–7 business days. All information is kept confidential and used solely for employment screening purposes."}
             </p>
           </div>
 

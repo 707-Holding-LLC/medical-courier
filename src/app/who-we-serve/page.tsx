@@ -4,6 +4,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import type { Metadata } from "next";
+import { client } from "@/sanity/lib/client";
+import { whoWeServePageQuery } from "@/sanity/lib/queries";
+import { urlFor } from "@/sanity/lib/image";
 
 export const metadata: Metadata = {
   title: "Who We Serve",
@@ -11,7 +14,64 @@ export const metadata: Metadata = {
     "707 Medical Services supports hospitals, laboratories, clinics, pharmacies, urgent care providers, and healthcare partners across Chicago and Illinois.",
 };
 
-const industries = [
+type SanityImage = {
+  asset?: unknown;
+  url?: string;
+  alt?: string;
+};
+
+type IndustryItem = {
+  title?: string;
+  description?: string;
+  icon?: string;
+};
+
+type ReliabilityPoint = {
+  title?: string;
+  description?: string;
+};
+
+type MetricItem = {
+  value?: string;
+  label?: string;
+};
+
+type WhoWeServePageData = {
+  hero?: {
+    image?: SanityImage;
+    titleLine1?: string;
+    titleLine2?: string;
+    description?: string;
+  };
+  industriesSection?: {
+    title?: string;
+    description?: string;
+    items?: IndustryItem[];
+  };
+  reliability?: {
+    title?: string;
+    description?: string;
+    points?: ReliabilityPoint[];
+    metrics?: MetricItem[];
+  };
+  communityImpact?: {
+    image?: SanityImage;
+    title?: string;
+    description?: string;
+    quote?: string;
+    quoteAttribution?: string;
+  };
+  cta?: {
+    title?: string;
+    description?: string;
+    primaryButtonText?: string;
+    primaryButtonHref?: string;
+    secondaryButtonText?: string;
+    secondaryButtonHref?: string;
+  };
+};
+
+const fallbackIndustries = [
   {
     title: "Hospitals",
     description:
@@ -50,7 +110,7 @@ const industries = [
   },
 ];
 
-const reliabilityPoints = [
+const fallbackReliabilityPoints = [
   {
     title: "HIPAA Awareness & Training",
     description:
@@ -73,14 +133,34 @@ const reliabilityPoints = [
   },
 ];
 
-const metrics = [
+const fallbackMetrics = [
   { value: "100%", label: "HIPAA Compliant" },
   { value: "24/7", label: "Operation" },
   { value: "<15m", label: "STAT Response" },
   { value: "99.9%", label: "On-Time Rate" },
 ];
 
-function IndustryIcon({ type }: { type: string }) {
+async function getWhoWeServePage(): Promise<WhoWeServePageData | null> {
+  return client.fetch(whoWeServePageQuery, {}, { cache: "no-store" });
+}
+
+function getImageUrl(image?: SanityImage, fallback?: string) {
+  if (image?.url) {
+    return image.url;
+  }
+
+  if (image?.asset) {
+    return urlFor(image).width(1400).height(900).url();
+  }
+
+  return fallback;
+}
+
+function isSanityImageUrl(src?: string) {
+  return Boolean(src?.startsWith("https://cdn.sanity.io"));
+}
+
+function IndustryIcon({ type }: { type?: string }) {
   const cls = "h-7 w-7 text-brand-green";
 
   switch (type) {
@@ -186,7 +266,9 @@ function IndustryIcon({ type }: { type: string }) {
   }
 }
 
-function HeroBanner() {
+function HeroBanner({ hero }: { hero?: WhoWeServePageData["hero"] }) {
+  const src = getImageUrl(hero?.image, "/who-we-serve-hero.png");
+
   return (
     <section className="section-space pb-10">
       <div className="container-shell">
@@ -194,27 +276,32 @@ function HeroBanner() {
           <div className="group relative overflow-hidden rounded-[2rem] shadow-[0_24px_60px_rgba(10,20,14,0.22)] transition duration-300 hover:-translate-y-1 hover:shadow-xl">
             <div className="relative h-[320px] sm:h-[380px] lg:h-[430px]">
               <Image
-                src="/who-we-serve-hero.png"
-                alt="Healthcare corridor representing medical logistics excellence"
+                src={src || "/who-we-serve-hero.png"}
+                alt={
+                  hero?.image?.alt ||
+                  "Healthcare corridor representing medical logistics excellence"
+                }
                 fill
+                unoptimized={isSanityImageUrl(src)}
                 sizes="100vw"
                 className="object-cover transition duration-700 group-hover:scale-105"
                 priority
               />
+
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,20,14,0.72)_0%,rgba(10,20,14,0.42)_45%,rgba(10,20,14,0.18)_100%)]" />
 
               <div className="absolute inset-0 flex items-center">
                 <div className="px-8 sm:px-12 lg:px-14">
                   <div className="max-w-3xl">
                     <h1 className="font-heading text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-                      Precision Logistics for
+                      {hero?.titleLine1 || "Precision Logistics for"}
                       <br />
-                      Healthcare Excellence
+                      {hero?.titleLine2 || "Healthcare Excellence"}
                     </h1>
 
                     <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
-                      Ensuring the integrity of every specimen and the reliability
-                      of every delivery across the healthcare spectrum.
+                      {hero?.description ||
+                        "Ensuring the integrity of every specimen and the reliability of every delivery across the healthcare spectrum."}
                     </p>
                   </div>
                 </div>
@@ -227,23 +314,32 @@ function HeroBanner() {
   );
 }
 
-function IndustriesSection() {
+function IndustriesSection({
+  section,
+}: {
+  section?: WhoWeServePageData["industriesSection"];
+}) {
+  const industries =
+    section?.items && section.items.length > 0
+      ? section.items
+      : fallbackIndustries;
+
   return (
     <section className="pb-12">
       <div className="container-shell">
         <Reveal className="mx-auto max-w-4xl text-center">
           <h2 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-            Industries We Serve
+            {section?.title || "Industries We Serve"}
           </h2>
           <p className="mt-4 text-lg leading-8 text-slate-600">
-            Specialized medical transport solutions tailored to specific
-            institutional needs.
+            {section?.description ||
+              "Specialized medical transport solutions tailored to specific institutional needs."}
           </p>
         </Reveal>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {industries.map((item, index) => (
-            <Reveal key={item.title} delay={0.06 * index}>
+            <Reveal key={item.title || index} delay={0.06 * index}>
               <article className="group rounded-[1.5rem] border border-brand-border bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft transition duration-300 group-hover:scale-105">
                   <IndustryIcon type={item.icon} />
@@ -265,7 +361,21 @@ function IndustriesSection() {
   );
 }
 
-function ReliabilitySection() {
+function ReliabilitySection({
+  reliability,
+}: {
+  reliability?: WhoWeServePageData["reliability"];
+}) {
+  const points =
+    reliability?.points && reliability.points.length > 0
+      ? reliability.points
+      : fallbackReliabilityPoints;
+
+  const metrics =
+    reliability?.metrics && reliability.metrics.length > 0
+      ? reliability.metrics
+      : fallbackMetrics;
+
   return (
     <section className="py-12">
       <div className="container-shell">
@@ -274,18 +384,17 @@ function ReliabilitySection() {
             <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
               <div>
                 <h2 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                  Reliability &amp; Compliance
+                  {reliability?.title || "Reliability & Compliance"}
                 </h2>
 
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-                  Our foundation is built on trust and regulatory excellence. We
-                  don&apos;t just move items; we manage critical healthcare data and
-                  assets with military-grade precision.
+                  {reliability?.description ||
+                    "Our foundation is built on trust and regulatory excellence. We don't just move items; we manage critical healthcare data and assets with military-grade precision."}
                 </p>
 
                 <div className="mt-8 space-y-6">
-                  {reliabilityPoints.map((point, index) => (
-                    <Reveal key={point.title} delay={0.05 * index}>
+                  {points.map((point, index) => (
+                    <Reveal key={point.title || index} delay={0.05 * index}>
                       <div className="flex items-start gap-4">
                         <span className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-brand-green/25 bg-white text-brand-green transition duration-300 hover:scale-105">
                           <svg
@@ -317,7 +426,7 @@ function ReliabilitySection() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 {metrics.map((metric, index) => (
-                  <Reveal key={metric.label} delay={0.08 * index}>
+                  <Reveal key={metric.label || index} delay={0.08 * index}>
                     <div className="rounded-[1.25rem] border border-brand-border bg-white px-6 py-8 text-center shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-lg">
                       <div className="font-heading text-4xl font-bold tracking-tight text-brand-green sm:text-5xl">
                         {metric.value}
@@ -337,14 +446,21 @@ function ReliabilitySection() {
   );
 }
 
-function CommunityIllustration() {
+function CommunityIllustration({
+  image,
+}: {
+  image?: SanityImage;
+}) {
+  const src = getImageUrl(image, "/who-we-serve-community.png");
+
   return (
     <Reveal delay={0.08}>
       <div className="group relative h-[360px] overflow-hidden rounded-[1.5rem] bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-xl">
         <Image
-          src="/who-we-serve-community.png"
-          alt="Healthcare professionals representing community impact"
+          src={src || "/who-we-serve-community.png"}
+          alt={image?.alt || "Healthcare professionals representing community impact"}
           fill
+          unoptimized={isSanityImageUrl(src)}
           sizes="(max-width: 1024px) 100vw, 45vw"
           className="object-cover transition duration-500 group-hover:scale-105"
         />
@@ -353,35 +469,38 @@ function CommunityIllustration() {
   );
 }
 
-function CommunityImpactSection() {
+function CommunityImpactSection({
+  communityImpact,
+}: {
+  communityImpact?: WhoWeServePageData["communityImpact"];
+}) {
   return (
     <section className="py-12">
       <div className="container-shell">
         <div className="grid gap-10 border-t border-brand-border pt-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <CommunityIllustration />
+          <CommunityIllustration image={communityImpact?.image} />
 
           <Reveal>
             <div>
               <h2 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                Community Impact
+                {communityImpact?.title || "Community Impact"}
               </h2>
 
               <p className="mt-6 text-lg leading-8 text-slate-600">
-                At 707 MEDeliver, we view ourselves as an extension of the
-                healthcare community. Every delivery we make directly impacts
-                patient outcomes. By providing reliable logistics, we help doctors
-                diagnose faster, allow researchers to innovate, and ensure
-                patients receive their medications without delay.
+                {communityImpact?.description ||
+                  "At 707 MEDeliver, we view ourselves as an extension of the healthcare community. Every delivery we make directly impacts patient outcomes. By providing reliable logistics, we help doctors diagnose faster, allow researchers to innovate, and ensure patients receive their medications without delay."}
               </p>
 
               <div className="mt-8 rounded-[1.25rem] border-l-4 border-brand-green bg-[#f4f5f7] px-6 py-6 transition duration-300 hover:shadow-lg">
                 <p className="text-lg leading-8 text-slate-700">
-                  &quot;Our mission is to strengthen the backbone of community health
-                  by removing the friction from medical transport. When logistics
-                  work, lives are saved.&quot;
+                  &quot;
+                  {communityImpact?.quote ||
+                    "Our mission is to strengthen the backbone of community health by removing the friction from medical transport. When logistics work, lives are saved."}
+                  &quot;
                 </p>
                 <p className="mt-5 text-lg font-semibold text-slate-900">
-                  — Operations Director, 707 MEDeliver
+                  {communityImpact?.quoteAttribution ||
+                    "— Operations Director, 707 MEDeliver"}
                 </p>
               </div>
             </div>
@@ -392,34 +511,34 @@ function CommunityImpactSection() {
   );
 }
 
-function CTASection() {
+function CTASection({ cta }: { cta?: WhoWeServePageData["cta"] }) {
   return (
     <section className="section-space pt-10">
       <div className="container-shell">
         <Reveal>
           <div className="rounded-[2rem] bg-[linear-gradient(135deg,#16261f_0%,#0f1b16_100%)] px-8 py-12 text-center shadow-[0_24px_60px_rgba(10,20,14,0.18)] sm:px-10 lg:px-14">
             <h2 className="font-heading text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              Partner with the Healthcare Logistics Experts
+              {cta?.title || "Partner with the Healthcare Logistics Experts"}
             </h2>
 
             <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-white/75">
-              Ready to streamline your medical transport operations? Contact us
-              today for a custom logistics assessment.
+              {cta?.description ||
+                "Ready to streamline your medical transport operations? Contact us today for a custom logistics assessment."}
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                href="/contact"
+                href={cta?.primaryButtonHref || "/contact"}
                 className="inline-flex items-center justify-center rounded-xl bg-brand-green px-6 py-4 text-base font-semibold text-white shadow-card transition duration-300 hover:-translate-y-1 hover:bg-brand-greenMedium"
               >
-                Request a Consultation
+                {cta?.primaryButtonText || "Request a Consultation"}
               </Link>
 
               <Link
-                href="/services"
+                href={cta?.secondaryButtonHref || "/services"}
                 className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-6 py-4 text-base font-semibold text-white backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:bg-white/15"
               >
-                View Service Areas
+                {cta?.secondaryButtonText || "View Service Areas"}
               </Link>
             </div>
           </div>
@@ -429,15 +548,17 @@ function CTASection() {
   );
 }
 
-export default function WhoWeServePage() {
+export default async function WhoWeServePage() {
+  const page = await getWhoWeServePage();
+
   return (
     <main className="min-h-screen bg-brand-bg">
       <Navbar />
-      <HeroBanner />
-      <IndustriesSection />
-      <ReliabilitySection />
-      <CommunityImpactSection />
-      <CTASection />
+      <HeroBanner hero={page?.hero} />
+      <IndustriesSection section={page?.industriesSection} />
+      <ReliabilitySection reliability={page?.reliability} />
+      <CommunityImpactSection communityImpact={page?.communityImpact} />
+      <CTASection cta={page?.cta} />
       <Footer />
     </main>
   );

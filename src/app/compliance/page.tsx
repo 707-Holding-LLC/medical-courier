@@ -4,6 +4,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import type { Metadata } from "next";
+import { client } from "@/sanity/lib/client";
+import { compliancePageQuery } from "@/sanity/lib/queries";
+import { urlFor } from "@/sanity/lib/image";
 
 export const metadata: Metadata = {
   title: "Reliability & Compliance",
@@ -11,7 +14,72 @@ export const metadata: Metadata = {
     "Learn how 707 MEDeliver approaches HIPAA awareness, secure specimen handling, chain-of-custody procedures, professional courier standards, and reliable delivery operations.",
 };
 
-const compliancePillars = [
+type SanityImage = {
+  asset?: unknown;
+  url?: string;
+  alt?: string;
+};
+
+type Pillar = {
+  title?: string;
+  description?: string;
+  icon?: string;
+};
+
+type Card = {
+  title?: string;
+  description?: string;
+};
+
+type Stat = {
+  value?: string;
+  label?: string;
+};
+
+type CompliancePageData = {
+  hero?: {
+    kicker?: string;
+    titleLine1?: string;
+    titleLine2?: string;
+    titleLine3?: string;
+    description?: string;
+    primaryButtonText?: string;
+    primaryButtonHref?: string;
+    secondaryButtonText?: string;
+    secondaryButtonHref?: string;
+    image?: SanityImage;
+  };
+  pillarsSection?: {
+    kicker?: string;
+    title?: string;
+    description?: string;
+    items?: Pillar[];
+  };
+  trainingSection?: {
+    kicker?: string;
+    title?: string;
+    description?: string;
+    points?: string[];
+    cards?: Card[];
+  };
+  secureOperations?: {
+    kicker?: string;
+    title?: string;
+    paragraphs?: string[];
+    quote?: string;
+    stats?: Stat[];
+  };
+  cta?: {
+    title?: string;
+    description?: string;
+    primaryButtonText?: string;
+    primaryButtonHref?: string;
+    secondaryButtonText?: string;
+    secondaryButtonHref?: string;
+  };
+};
+
+const fallbackPillars = [
   {
     title: "HIPAA Awareness",
     description:
@@ -44,7 +112,15 @@ const compliancePillars = [
   },
 ];
 
-const trainingCards = [
+const fallbackTrainingPoints = [
+  "Privacy-aware courier operations",
+  "Secure specimen handling procedures",
+  "Chain-of-custody discipline",
+  "Professional driver presentation",
+  "Reliable scheduling and delivery coordination",
+];
+
+const fallbackTrainingCards = [
   {
     title: "HIPAA Awareness Training",
     description:
@@ -67,14 +143,37 @@ const trainingCards = [
   },
 ];
 
-const trustStats = [
+const fallbackParagraphs = [
+  "In healthcare logistics, reliability is tied directly to trust. Secure handling, disciplined delivery processes, and professional execution help protect sensitive materials and support stronger partnerships with clinics, labs, pharmacies, and healthcare providers.",
+  "Our compliance-centered operating mindset supports better specimen integrity, clearer handoff accountability, more dependable scheduling, and a stronger standard of service across every route.",
+];
+
+const fallbackTrustStats = [
   { value: "HIPAA", label: "Awareness Focus" },
   { value: "Secure", label: "Handling Standards" },
   { value: "Tracked", label: "Delivery Visibility" },
   { value: "Reliable", label: "Operational Discipline" },
 ];
 
-function ComplianceIcon({ type }: { type: string }) {
+async function getCompliancePage(): Promise<CompliancePageData | null> {
+  return client.fetch(compliancePageQuery, {}, { cache: "no-store" });
+}
+
+function getImageUrl(image?: SanityImage, fallback?: string) {
+  if (image?.url) return image.url;
+
+  if (image?.asset) {
+    return urlFor(image).width(1200).height(900).url();
+  }
+
+  return fallback;
+}
+
+function isSanityImageUrl(src?: string) {
+  return Boolean(src?.startsWith("https://cdn.sanity.io"));
+}
+
+function ComplianceIcon({ type }: { type?: string }) {
   const cls = "h-7 w-7 text-brand-green";
 
   switch (type) {
@@ -158,43 +257,67 @@ function ComplianceIcon({ type }: { type: string }) {
   }
 }
 
-function HeroSection() {
+function CheckItem({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-4">
+      <span className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-brand-green/25 bg-white text-brand-green transition duration-300 hover:scale-105">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
+      </span>
+      <span className="text-base leading-7 text-slate-700">{children}</span>
+    </div>
+  );
+}
+
+function HeroSection({ hero }: { hero?: CompliancePageData["hero"] }) {
+  const src = getImageUrl(hero?.image, "/compliance.png");
+
   return (
     <section className="section-space pb-10">
       <div className="container-shell">
         <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr]">
           <Reveal className="max-w-3xl" y={28}>
             <span className="inline-flex items-center rounded-full bg-brand-soft px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-greenMedium">
-              Reliability &amp; Compliance
+              {hero?.kicker || "Reliability & Compliance"}
             </span>
 
             <h1 className="mt-6 font-heading text-5xl font-bold leading-[1.02] tracking-tight text-slate-900 sm:text-6xl">
-              Trusted Handling.
+              {hero?.titleLine1 || "Trusted Handling."}
               <br />
-              Secure Operations.
+              {hero?.titleLine2 || "Secure Operations."}
               <br />
-              <span className="text-brand-green">Reliable Delivery.</span>
+              <span className="text-brand-green">
+                {hero?.titleLine3 || "Reliable Delivery."}
+              </span>
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-              707 MEDeliver prioritizes privacy awareness, secure specimen
-              handling, professional courier operations, and reliable delivery
-              processes designed for healthcare logistics.
+              {hero?.description ||
+                "707 MEDeliver prioritizes privacy awareness, secure specimen handling, professional courier operations, and reliable delivery processes designed for healthcare logistics."}
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link
-                href="/contact"
+                href={hero?.primaryButtonHref || "/contact"}
                 className="inline-flex items-center justify-center rounded-xl bg-brand-green px-6 py-4 text-sm font-semibold text-white shadow-card transition duration-300 hover:-translate-y-1 hover:bg-brand-greenMedium hover:shadow-xl"
               >
-                Request Service
+                {hero?.primaryButtonText || "Request Service"}
               </Link>
 
               <Link
-                href="/services"
+                href={hero?.secondaryButtonHref || "/services"}
                 className="inline-flex items-center justify-center rounded-xl border border-brand-border bg-white px-6 py-4 text-sm font-semibold text-slate-800 transition duration-300 hover:-translate-y-1 hover:border-brand-green hover:text-brand-green hover:shadow-lg"
               >
-                View Services
+                {hero?.secondaryButtonText || "View Services"}
               </Link>
             </div>
           </Reveal>
@@ -203,9 +326,10 @@ function HeroSection() {
             <div className="group relative overflow-hidden rounded-[2rem] bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-xl">
               <div className="relative aspect-[4/3] w-full">
                 <Image
-                  src="/compliance.png"
-                  alt="Medical courier compliance visual"
+                  src={src || "/compliance.png"}
+                  alt={hero?.image?.alt || "Medical courier compliance visual"}
                   fill
+                  unoptimized={isSanityImageUrl(src)}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover transition duration-500 group-hover:scale-105"
                   priority
@@ -219,22 +343,33 @@ function HeroSection() {
   );
 }
 
-function PillarsSection() {
+function PillarsSection({
+  section,
+}: {
+  section?: CompliancePageData["pillarsSection"];
+}) {
+  const pillars =
+    section?.items && section.items.length > 0 ? section.items : fallbackPillars;
+
   return (
     <section className="pb-12">
       <div className="container-shell">
         <Reveal className="mx-auto max-w-4xl text-center">
-          <span className="section-kicker">Core Standards</span>
-          <h2 className="section-title">How We Approach Compliance</h2>
+          <span className="section-kicker">
+            {section?.kicker || "Core Standards"}
+          </span>
+          <h2 className="section-title">
+            {section?.title || "How We Approach Compliance"}
+          </h2>
           <p className="body-muted mt-4">
-            Built around secure handling, structured delivery discipline, and
-            professional healthcare logistics practices.
+            {section?.description ||
+              "Built around secure handling, structured delivery discipline, and professional healthcare logistics practices."}
           </p>
         </Reveal>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {compliancePillars.map((pillar, index) => (
-            <Reveal key={pillar.title} delay={0.06 * index}>
+          {pillars.map((pillar, index) => (
+            <Reveal key={pillar.title || index} delay={0.06 * index}>
               <article className="group rounded-[1.5rem] border border-brand-border bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft transition duration-300 group-hover:scale-105">
                   <ComplianceIcon type={pillar.icon} />
@@ -256,7 +391,21 @@ function PillarsSection() {
   );
 }
 
-function TrainingSection() {
+function TrainingSection({
+  section,
+}: {
+  section?: CompliancePageData["trainingSection"];
+}) {
+  const points =
+    section?.points && section.points.length > 0
+      ? section.points
+      : fallbackTrainingPoints;
+
+  const cards =
+    section?.cards && section.cards.length > 0
+      ? section.cards
+      : fallbackTrainingCards;
+
   return (
     <section className="py-12">
       <div className="container-shell">
@@ -264,53 +413,30 @@ function TrainingSection() {
           <div className="rounded-[1.75rem] bg-[#eef2f4] p-8 sm:p-10 lg:p-12">
             <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
               <div>
-                <span className="section-kicker">Training &amp; Standards</span>
+                <span className="section-kicker">
+                  {section?.kicker || "Training & Standards"}
+                </span>
                 <h2 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                  Compliance Backed by Process
+                  {section?.title || "Compliance Backed by Process"}
                 </h2>
 
                 <p className="mt-6 text-lg leading-8 text-slate-600">
-                  Reliability in medical courier operations depends on more than
-                  speed. It requires secure handling standards, privacy awareness,
-                  disciplined handoff procedures, and consistent professional
-                  conduct across every route.
+                  {section?.description ||
+                    "Reliability in medical courier operations depends on more than speed. It requires secure handling standards, privacy awareness, disciplined handoff procedures, and consistent professional conduct across every route."}
                 </p>
 
                 <div className="mt-8 space-y-5">
-                  {[
-                    "Privacy-aware courier operations",
-                    "Secure specimen handling procedures",
-                    "Chain-of-custody discipline",
-                    "Professional driver presentation",
-                    "Reliable scheduling and delivery coordination",
-                  ].map((item, index) => (
+                  {points.map((item, index) => (
                     <Reveal key={item} delay={0.05 * index}>
-                      <div className="flex items-start gap-4">
-                        <span className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-brand-green/25 bg-white text-brand-green transition duration-300 hover:scale-105">
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M20 6L9 17l-5-5" />
-                          </svg>
-                        </span>
-                        <span className="text-base leading-7 text-slate-700">
-                          {item}
-                        </span>
-                      </div>
+                      <CheckItem>{item}</CheckItem>
                     </Reveal>
                   ))}
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                {trainingCards.map((card, index) => (
-                  <Reveal key={card.title} delay={0.07 * index}>
+                {cards.map((card, index) => (
+                  <Reveal key={card.title || index} delay={0.07 * index}>
                     <div className="rounded-[1.25rem] border border-brand-border bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-lg">
                       <h3 className="font-heading text-2xl font-semibold text-slate-900">
                         {card.title}
@@ -330,46 +456,52 @@ function TrainingSection() {
   );
 }
 
-function SecureOperationsSection() {
+function SecureOperationsSection({
+  section,
+}: {
+  section?: CompliancePageData["secureOperations"];
+}) {
+  const paragraphs =
+    section?.paragraphs && section.paragraphs.length > 0
+      ? section.paragraphs
+      : fallbackParagraphs;
+
+  const stats =
+    section?.stats && section.stats.length > 0
+      ? section.stats
+      : fallbackTrustStats;
+
   return (
     <section className="py-12">
       <div className="container-shell">
         <div className="grid items-center gap-10 lg:grid-cols-[1fr_0.95fr]">
           <Reveal className="max-w-2xl">
-            <span className="section-kicker">Secure Operations</span>
+            <span className="section-kicker">
+              {section?.kicker || "Secure Operations"}
+            </span>
             <h2 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              Why Compliance Matters
+              {section?.title || "Why Compliance Matters"}
             </h2>
 
             <div className="mt-6 space-y-6 text-lg leading-8 text-slate-600">
-              <p>
-                In healthcare logistics, reliability is tied directly to trust.
-                Secure handling, disciplined delivery processes, and
-                professional execution help protect sensitive materials and
-                support stronger partnerships with clinics, labs, pharmacies,
-                and healthcare providers.
-              </p>
-
-              <p>
-                Our compliance-centered operating mindset supports better
-                specimen integrity, clearer handoff accountability, more
-                dependable scheduling, and a stronger standard of service across
-                every route.
-              </p>
+              {paragraphs.map((paragraph, index) => (
+                <p key={`${paragraph}-${index}`}>{paragraph}</p>
+              ))}
             </div>
 
             <div className="mt-8 rounded-[1.25rem] border-l-4 border-brand-green bg-[#f4f5f7] px-6 py-6 transition duration-300 hover:shadow-lg">
               <p className="text-lg leading-8 text-slate-700">
-                “Compliance is not just about checking boxes. It is about
-                building confidence in every pickup, every handoff, and every
-                delivery.”
+                “
+                {section?.quote ||
+                  "Compliance is not just about checking boxes. It is about building confidence in every pickup, every handoff, and every delivery."}
+                ”
               </p>
             </div>
           </Reveal>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {trustStats.map((stat, index) => (
-              <Reveal key={stat.label} delay={0.07 * index}>
+            {stats.map((stat, index) => (
+              <Reveal key={stat.label || index} delay={0.07 * index}>
                 <div className="rounded-[1.25rem] border border-brand-border bg-white px-6 py-8 text-center shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lg">
                   <div className="font-heading text-4xl font-bold tracking-tight text-brand-green sm:text-5xl">
                     {stat.value}
@@ -387,34 +519,34 @@ function SecureOperationsSection() {
   );
 }
 
-function CTASection() {
+function CTASection({ cta }: { cta?: CompliancePageData["cta"] }) {
   return (
     <section className="section-space pt-10">
       <div className="container-shell">
         <Reveal>
           <div className="rounded-[2rem] bg-[linear-gradient(135deg,#16261f_0%,#0f1b16_100%)] px-8 py-12 text-center shadow-[0_24px_60px_rgba(10,20,14,0.18)] sm:px-10 lg:px-14">
             <h2 className="font-heading text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              Work with a Compliance-Conscious Logistics Partner
+              {cta?.title || "Work with a Compliance-Conscious Logistics Partner"}
             </h2>
 
             <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-white/75">
-              Need a courier partner that values secure handling, professional
-              delivery standards, and reliable healthcare logistics operations?
+              {cta?.description ||
+                "Need a courier partner that values secure handling, professional delivery standards, and reliable healthcare logistics operations?"}
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                href="/contact"
+                href={cta?.primaryButtonHref || "/contact"}
                 className="inline-flex items-center justify-center rounded-xl bg-brand-green px-6 py-4 text-base font-semibold text-white shadow-card transition duration-300 hover:-translate-y-1 hover:bg-brand-greenMedium"
               >
-                Request Service
+                {cta?.primaryButtonText || "Request Service"}
               </Link>
 
               <Link
-                href="/services"
+                href={cta?.secondaryButtonHref || "/services"}
                 className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-6 py-4 text-base font-semibold text-white backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:bg-white/15"
               >
-                Explore Services
+                {cta?.secondaryButtonText || "Explore Services"}
               </Link>
             </div>
           </div>
@@ -424,15 +556,17 @@ function CTASection() {
   );
 }
 
-export default function CompliancePage() {
+export default async function CompliancePage() {
+  const page = await getCompliancePage();
+
   return (
     <main className="min-h-screen bg-brand-bg">
       <Navbar />
-      <HeroSection />
-      <PillarsSection />
-      <TrainingSection />
-      <SecureOperationsSection />
-      <CTASection />
+      <HeroSection hero={page?.hero} />
+      <PillarsSection section={page?.pillarsSection} />
+      <TrainingSection section={page?.trainingSection} />
+      <SecureOperationsSection section={page?.secureOperations} />
+      <CTASection cta={page?.cta} />
       <Footer />
     </main>
   );

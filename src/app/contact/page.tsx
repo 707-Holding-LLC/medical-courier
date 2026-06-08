@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactPageClient from "@/components/ContactPageClient";
+import { client } from "@/sanity/lib/client";
+import { contactSettingsQuery } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -9,11 +11,17 @@ export const metadata: Metadata = {
     "Request courier service or contact 707 Medical Services for healthcare logistics support in Chicago and Illinois.",
 };
 
-export default function ContactPage() {
+async function getContactSettings() {
+  return client.fetch(contactSettingsQuery, {}, { cache: "no-store" });
+}
+
+export default async function ContactPage() {
+  const settings = await getContactSettings();
+
   return (
     <main className="min-h-screen bg-brand-bg">
       <Navbar />
-      <ContactPageClient />
+      <ContactPageClient settings={settings} />
       <Footer />
     </main>
   );

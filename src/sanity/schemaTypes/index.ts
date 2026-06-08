@@ -6,6 +6,7 @@ import {homePageType} from "./homePage";
 import {seoType} from "./seo";
 import {servicesPageType} from "./servicesPage";
 import {whoWeServePageType} from "./whoWeServePage";
+import {legalPageType} from "./legalPage";
 
 export const schemaTypes = [
   seoType,
@@ -16,4 +17,5 @@ export const schemaTypes = [
   contactSettingsType,
   careersPageType,
   compliancePageType,
+  legalPageType,
 ];

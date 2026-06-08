@@ -3,6 +3,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import type { Metadata } from "next";
+import { client } from "@/sanity/lib/client";
+import { servicesPageQuery } from "@/sanity/lib/queries";
+import { urlFor } from "@/sanity/lib/image";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -10,7 +13,51 @@ export const metadata: Metadata = {
     "Explore medical courier services, laboratory specimen transport, pharmacy logistics, and healthcare logistics support from 707 Medical Services.",
 };
 
-const services = [
+type SanityImage = {
+  asset?: unknown;
+  url?: string;
+  alt?: string;
+};
+
+type ServiceItem = {
+  title?: string;
+  description?: string;
+  bullets?: string[];
+  icon?: string;
+  visual?: string;
+  image?: SanityImage;
+};
+
+type CoverageArea = {
+  title?: string;
+  description?: string;
+  icon?: string;
+};
+
+type ServicesPageData = {
+  hero?: {
+    kicker?: string;
+    titleBeforeHighlight?: string;
+    titleHighlight?: string;
+    titleAfterBreak?: string;
+    description?: string;
+    image?: SanityImage;
+  };
+  servicesSection?: {
+    items?: ServiceItem[];
+  };
+  coverage?: {
+    title?: string;
+    description?: string;
+    areas?: CoverageArea[];
+    image?: SanityImage;
+    statLabel?: string;
+    statValue?: string;
+    statDescription?: string;
+  };
+};
+
+const fallbackServices = [
   {
     title: "Medical Courier Services",
     description:
@@ -61,7 +108,36 @@ const services = [
   },
 ];
 
-function Icon({ type }: { type: string }) {
+const fallbackCoverageAreas = [
+  {
+    title: "Chicago Metropolitan",
+    description: "Full coverage of Cook County and surrounding suburbs.",
+    icon: "building",
+  },
+  {
+    title: "Statewide Illinois",
+    description: "Expedited service to Springfield, Peoria, Rockford, and more.",
+    icon: "map",
+  },
+];
+
+async function getServicesPage(): Promise<ServicesPageData | null> {
+  return client.fetch(servicesPageQuery, {}, { cache: "no-store" });
+}
+
+function getImageUrl(image?: SanityImage, fallback?: string) {
+  if (image?.url) {
+    return image.url;
+  }
+
+  if (image?.asset) {
+    return urlFor(image).width(1200).height(900).url();
+  }
+
+  return fallback;
+}
+
+function Icon({ type }: { type?: string }) {
   const base = "h-7 w-7 text-brand-green";
 
   switch (type) {
@@ -139,6 +215,47 @@ function Icon({ type }: { type: string }) {
   }
 }
 
+function CoverageIcon({ type }: { type?: string }) {
+  if (type === "map") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 6l7-2 4 2 7-2v14l-7 2-4-2-7 2V6z" />
+        <path d="M10 4v14" />
+        <path d="M14 6v14" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 21h18" />
+      <path d="M5 21V8l7-4v17" />
+      <path d="M19 21V11l-7-4" />
+      <path d="M9 9h.01" />
+      <path d="M9 13h.01" />
+      <path d="M9 17h.01" />
+      <path d="M15 13h.01" />
+      <path d="M15 17h.01" />
+    </svg>
+  );
+}
+
 function Bullet({ text }: { text: string }) {
   return (
     <li className="flex items-start gap-3 text-base leading-7 text-slate-600">
@@ -150,7 +267,7 @@ function Bullet({ text }: { text: string }) {
   );
 }
 
-function ServiceVisual({ type }: { type: string }) {
+function ServiceVisual({ service }: { service: ServiceItem }) {
   const imageMap: Record<string, { src: string; alt: string }> = {
     courier: {
       src: "/medical-courier.png",
@@ -170,13 +287,14 @@ function ServiceVisual({ type }: { type: string }) {
     },
   };
 
-  const image = imageMap[type];
+  const fallbackImage = imageMap[service.visual || "courier"];
+  const src = getImageUrl(service.image, fallbackImage.src);
 
   return (
     <div className="group relative h-44 overflow-hidden rounded-[1.25rem] bg-white">
       <Image
-        src={image.src}
-        alt={image.alt}
+        src={src || fallbackImage.src}
+        alt={service.image?.alt || fallbackImage.alt}
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 520px"
         className="object-cover transition duration-500 group-hover:scale-105"
@@ -185,12 +303,14 @@ function ServiceVisual({ type }: { type: string }) {
   );
 }
 
-function HeroGraphic() {
+function HeroGraphic({ image }: { image?: SanityImage }) {
+  const src = getImageUrl(image, "/precision-healthcare.png");
+
   return (
     <div className="group relative mx-auto h-[280px] w-full max-w-[430px] overflow-hidden rounded-[2rem] bg-brand-soft shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-xl">
       <Image
-        src="/precision-healthcare.png"
-        alt="Precision healthcare logistics visual"
+        src={src || "/precision-healthcare.png"}
+        alt={image?.alt || "Precision healthcare logistics visual"}
         fill
         sizes="(max-width: 1024px) 100vw, 430px"
         className="object-cover transition duration-500 group-hover:scale-105"
@@ -199,14 +319,16 @@ function HeroGraphic() {
   );
 }
 
-function CoverageMap() {
+function CoverageMap({ coverage }: { coverage?: ServicesPageData["coverage"] }) {
+  const src = getImageUrl(coverage?.image, "/services-coverage-map.png");
+
   return (
     <Reveal delay={0.1}>
       <div className="group relative overflow-hidden rounded-[1.75rem] shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-xl">
         <div className="relative h-[320px]">
           <Image
-            src="/services-coverage-map.png"
-            alt="Illinois healthcare logistics coverage map"
+            src={src || "/services-coverage-map.png"}
+            alt={coverage?.image?.alt || "Illinois healthcare logistics coverage map"}
             fill
             sizes="(max-width: 1024px) 100vw, 55vw"
             className="object-cover transition duration-500 group-hover:scale-105"
@@ -215,13 +337,13 @@ function CoverageMap() {
 
         <div className="absolute bottom-5 right-5 rounded-[1.25rem] bg-brand-green px-6 py-5 text-white shadow-[0_20px_40px_rgba(22,56,40,0.2)]">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-            Response Time
+            {coverage?.statLabel || "Response Time"}
           </div>
           <div className="mt-1 font-heading text-4xl font-bold tracking-tight">
-            Under 60min
+            {coverage?.statValue || "Under 60min"}
           </div>
           <div className="mt-1 text-sm text-white/80">
-            For Chicago metro stat orders
+            {coverage?.statDescription || "For Chicago metro stat orders"}
           </div>
         </div>
       </div>
@@ -229,7 +351,20 @@ function CoverageMap() {
   );
 }
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const page = await getServicesPage();
+
+  const hero = page?.hero;
+  const services =
+    page?.servicesSection?.items && page.servicesSection.items.length > 0
+      ? page.servicesSection.items
+      : fallbackServices;
+
+  const coverageAreas =
+    page?.coverage?.areas && page.coverage.areas.length > 0
+      ? page.coverage.areas
+      : fallbackCoverageAreas;
+
   return (
     <main className="min-h-screen bg-brand-bg">
       <Navbar />
@@ -239,25 +374,26 @@ export default function ServicesPage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
             <Reveal className="max-w-3xl" y={28}>
               <span className="inline-flex items-center rounded-full bg-brand-soft px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-greenMedium">
-                HIPAA Compliant Logistics
+                {hero?.kicker || "HIPAA Compliant Logistics"}
               </span>
 
               <h1 className="mt-6 font-heading text-5xl font-bold leading-[1.02] tracking-tight text-slate-900 sm:text-6xl">
-                Precision Healthcare{" "}
-                <span className="text-brand-green">Logistics</span>
+                {hero?.titleBeforeHighlight || "Precision Healthcare"}{" "}
+                <span className="text-brand-green">
+                  {hero?.titleHighlight || "Logistics"}
+                </span>
                 <br />
-                Solutions
+                {hero?.titleAfterBreak || "Solutions"}
               </h1>
 
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-                Reliable, secure, and professional medical transport specialized
-                for the unique demands of the healthcare industry across Chicago
-                and statewide Illinois.
+                {hero?.description ||
+                  "Reliable, secure, and professional medical transport specialized for the unique demands of the healthcare industry across Chicago and statewide Illinois."}
               </p>
             </Reveal>
 
             <Reveal delay={0.12} y={30}>
-              <HeroGraphic />
+              <HeroGraphic image={hero?.image} />
             </Reveal>
           </div>
         </div>
@@ -267,7 +403,7 @@ export default function ServicesPage() {
         <div className="container-shell">
           <div className="grid gap-8 xl:grid-cols-2">
             {services.map((service, index) => (
-              <Reveal key={service.title} delay={0.06 * index}>
+              <Reveal key={service.title || index} delay={0.06 * index}>
                 <article className="group rounded-[1.75rem] border border-brand-border bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-xl">
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft transition duration-300 group-hover:scale-105">
                     <Icon type={service.icon} />
@@ -282,13 +418,13 @@ export default function ServicesPage() {
                   </p>
 
                   <ul className="mt-6 space-y-3">
-                    {service.bullets.map((bullet) => (
+                    {(service.bullets || []).map((bullet) => (
                       <Bullet key={bullet} text={bullet} />
                     ))}
                   </ul>
 
                   <div className="mt-8">
-                    <ServiceVisual type={service.visual} />
+                    <ServiceVisual service={service} />
                   </div>
                 </article>
               </Reveal>
@@ -302,82 +438,39 @@ export default function ServicesPage() {
           <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
             <Reveal className="max-w-2xl">
               <h2 className="font-heading text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
-                Service Coverage Areas
+                {page?.coverage?.title || "Service Coverage Areas"}
               </h2>
 
               <p className="mt-6 text-lg leading-8 text-slate-600">
-                Based in the heart of Illinois, we offer comprehensive coverage
-                from downtown Chicago to the furthest reaches of the state. Our
-                fleet is equipped to handle long-distance medical transport
-                without compromising security or temperature stability.
+                {page?.coverage?.description ||
+                  "Based in the heart of Illinois, we offer comprehensive coverage from downtown Chicago to the furthest reaches of the state. Our fleet is equipped to handle long-distance medical transport without compromising security or temperature stability."}
               </p>
 
               <div className="mt-8 space-y-4">
-                <div className="rounded-[1.25rem] bg-[#f4f5f7] p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-green transition duration-300 hover:scale-105">
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.9"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 21h18" />
-                        <path d="M5 21V8l7-4v17" />
-                        <path d="M19 21V11l-7-4" />
-                        <path d="M9 9h.01" />
-                        <path d="M9 13h.01" />
-                        <path d="M9 17h.01" />
-                        <path d="M15 13h.01" />
-                        <path d="M15 17h.01" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-heading text-xl font-semibold text-slate-900">
-                        Chicago Metropolitan
-                      </h3>
-                      <p className="mt-1 text-base leading-7 text-slate-600">
-                        Full coverage of Cook County and surrounding suburbs.
-                      </p>
+                {coverageAreas.map((area, index) => (
+                  <div
+                    key={area.title || index}
+                    className="rounded-[1.25rem] bg-[#f4f5f7] p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-green transition duration-300 hover:scale-105">
+                        <CoverageIcon type={area.icon} />
+                      </div>
+                      <div>
+                        <h3 className="font-heading text-xl font-semibold text-slate-900">
+                          {area.title}
+                        </h3>
+                        <p className="mt-1 text-base leading-7 text-slate-600">
+                          {area.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="rounded-[1.25rem] bg-[#f4f5f7] p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-green transition duration-300 hover:scale-105">
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.9"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 6l7-2 4 2 7-2v14l-7 2-4-2-7 2V6z" />
-                        <path d="M10 4v14" />
-                        <path d="M14 6v14" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-heading text-xl font-semibold text-slate-900">
-                        Statewide Illinois
-                      </h3>
-                      <p className="mt-1 text-base leading-7 text-slate-600">
-                        Expedited service to Springfield, Peoria, Rockford, and
-                        more.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </Reveal>
 
-            <CoverageMap />
+            <CoverageMap coverage={page?.coverage} />
           </div>
         </div>
       </section>
