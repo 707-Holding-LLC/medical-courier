@@ -145,3 +145,54 @@ export const legalPageQuery = `*[_type == "legalPage" && slug.current == $slug][
   lastUpdated,
   body
 }`;
+
+
+export const insightPostsQuery = `*[
+  _type == "insightPost" &&
+  status == "published"
+] | order(coalesce(publishAt, _createdAt) desc) {
+  _id,
+  title,
+  slug,
+  contentPillar,
+  excerpt,
+  featuredImage{
+    ...,
+    asset->
+  },
+  featuredImageAlt,
+  author,
+  publishAt,
+  status,
+  approvalStatus,
+  complianceStatus,
+  seoKeyword
+}`;
+
+export const insightPostBySlugQuery = `*[
+  _type == "insightPost" &&
+  slug.current == $slug &&
+  status == "published"
+][0] {
+  _id,
+  title,
+  slug,
+  contentPillar,
+  excerpt,
+  featuredImage{
+    ...,
+    asset->
+  },
+  featuredImageAlt,
+  body,
+  author,
+  publishAt,
+  status,
+  approvalStatus,
+  complianceStatus,
+  complianceNotes,
+  sourceTranscriptLink,
+  sourceFileLink,
+  seoKeyword,
+  linkedInRepurposeNotes
+}`;
